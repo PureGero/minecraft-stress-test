@@ -14,6 +14,7 @@ import java.util.zip.InflaterInputStream;
 public class Bot extends Thread {
     private static final int PROTOCOL_VERSION = Integer.parseInt(System.getProperty("bot.protocol.version", "757")); // 757 is 1.18
     private static final double RADIUS = Double.parseDouble(System.getProperty("bot.radius", "1000"));
+    private static final boolean LOGS = Boolean.parseBoolean(System.getProperty("bot.logs", "true"));
 
     private static final Executor ONE_TICK_DELAY = CompletableFuture.delayedExecutor(50,TimeUnit.MILLISECONDS);
 
@@ -170,7 +171,9 @@ public class Bot extends Thread {
             y = (flags & 0x02) == 0x02 ? y + dy : dy;
             z = (flags & 0x04) == 0x04 ? z + dz : dz;
 
-            System.out.println("Teleporting " + username + " to " + x + "," + y + "," + z);
+            if (LOGS) {
+                System.out.println("Teleporting " + username + " to " + x + "," + y + "," + z);
+            }
 
             // Try going up to go over the block, or turn around and go a different way
             goUp = Math.random() < 0.5;
