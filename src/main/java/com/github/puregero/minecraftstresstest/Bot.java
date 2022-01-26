@@ -45,10 +45,6 @@ public class Bot extends Thread {
 
             sendLoginPackets(in, out);
 
-            if (!compressed) {
-                System.out.println("Not compressed!!!");
-            }
-
             FriendlyDataOutputStream settingsPacket = new FriendlyDataOutputStream();
             settingsPacket.write(0x05);
             settingsPacket.writeString("en_GB");
@@ -60,9 +56,7 @@ public class Bot extends Thread {
             settingsPacket.writeBoolean(false);
             settingsPacket.writeBoolean(true);
 
-            out.writeVarInt(settingsPacket.size() + 1);
-            out.writeVarInt(0);
-            out.write(settingsPacket.toByteArray());
+            writePacket(out, settingsPacket.toByteArray());
 
             CompletableFuture.delayedExecutor(1000,TimeUnit.MILLISECONDS).execute(() -> tick(socket));
 
@@ -82,6 +76,16 @@ public class Bot extends Thread {
         }
 
         System.out.println(username + " has disconnected from " + address + ":" + port);
+    }
+
+    public void writePacket(FriendlyDataOutputStream out, byte[] bytes) throws IOException {
+        if (compressed) {
+            out.writeVarInt(bytes.length + 1);
+            out.writeVarInt(0);
+        } else {
+            out.writeVarInt(bytes.length);
+        }
+        out.write(bytes);
     }
 
     private void tick(Socket socket) {
@@ -120,9 +124,7 @@ public class Bot extends Thread {
             movePacket.writeBoolean(true);
 
             FriendlyDataOutputStream out = new FriendlyDataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
-            out.writeVarInt(movePacket.size() + 1);
-            out.writeVarInt(0);
-            out.write(movePacket.toByteArray());
+            writePacket(out, movePacket.toByteArray());
             out.flush();
         } catch (IOException e) {
             e.printStackTrace();
