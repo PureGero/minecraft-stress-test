@@ -22,6 +22,7 @@ public class Bot extends Thread {
     private String username;
     private UUID uuid;
     private boolean compressed = false;
+    private boolean shutdown = false;
 
     private double x = 0;
     private double y = 0;
@@ -35,6 +36,7 @@ public class Bot extends Thread {
         this.address = address;
         this.port = port;
         setName("BotThread-" + username);
+        start();
     }
 
     @Override
@@ -60,7 +62,7 @@ public class Bot extends Thread {
 
             CompletableFuture.delayedExecutor(1000,TimeUnit.MILLISECONDS).execute(() -> tick(socket));
 
-            while (!socket.isClosed()) {
+            while (!socket.isClosed() && !shutdown) {
                 byte[] buffer = new byte[in.readVarInt()];
                 in.readFully(buffer);
 
@@ -225,5 +227,9 @@ public class Bot extends Thread {
                 throw new IOException("Unknown login packet id of " + packetId);
             }
         }
+    }
+
+    public void close() {
+        shutdown = true;
     }
 }

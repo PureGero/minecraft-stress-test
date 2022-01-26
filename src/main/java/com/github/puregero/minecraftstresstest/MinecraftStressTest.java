@@ -1,5 +1,9 @@
 package com.github.puregero.minecraftstresstest;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
 public class MinecraftStressTest {
 
     private static final int BOT_COUNT = Integer.parseInt(System.getProperty("bot.count", "1"));
@@ -8,8 +12,30 @@ public class MinecraftStressTest {
     private static final int DELAY_BETWEEN_BOTS_MS = Integer.parseInt(System.getProperty("bot.login.delay.ms", "100"));
 
     public static void main(String[] a) {
-        for (int i = 0; i < BOT_COUNT; i ++) {
-            new Bot("Bot" + (i + 1), ADDRESS, PORT).start();
+        List<Bot> bots = new ArrayList<>();
+
+        updateBotCount(bots, BOT_COUNT);
+
+        Scanner scanner = new Scanner(System.in);
+
+        while (scanner.hasNext()) {
+            int botCount = scanner.nextInt();
+
+            System.out.println("Setting bot count to " + botCount);
+
+            updateBotCount(bots, botCount);
+        }
+
+        System.out.println("stdin ended");
+    }
+
+    private static void updateBotCount(List<Bot> bots, int botCount) {
+        while (bots.size() > botCount && !bots.isEmpty()) {
+            bots.remove(bots.size() - 1).close();
+        }
+
+        while (bots.size() < botCount) {
+            bots.add(new Bot("Bot" + (bots.size() + 1), ADDRESS, PORT));
             try {
                 Thread.sleep(DELAY_BETWEEN_BOTS_MS);
             } catch (InterruptedException e) {
