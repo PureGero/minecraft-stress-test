@@ -19,11 +19,15 @@ public class MinecraftStressTest {
         Scanner scanner = new Scanner(System.in);
 
         while (scanner.hasNext()) {
-            int botCount = scanner.nextInt();
+            String line = scanner.nextLine();
 
-            System.out.println("Setting bot count to " + botCount);
-
-            updateBotCount(bots, botCount);
+            try {
+                int botCount = Integer.parseInt(line);
+                System.out.println("Setting bot count to " + botCount);
+                updateBotCount(bots, botCount);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
         System.out.println("stdin ended");
