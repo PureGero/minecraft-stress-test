@@ -30,7 +30,7 @@ allow-flight=true
 Run the bot with
 
 ```shell
-java -jar target/minecraft-stress-test-1.0.0-SNAPSHOT.jar
+java -jar target/minecraft-stress-test-1.0.0-SNAPSHOT-jar-with-dependencies.jar
 ```
 
 Or, specify optional parameters:
@@ -42,7 +42,7 @@ java
     -Dbot.port=25565
     -Dbot.login.delay.ms=100
     -Dbot.radius=1000
-    -jar target/minecraft-stress-test-1.0.0-SNAPSHOT.jar
+    -jar target/minecraft-stress-test-1.0.0-SNAPSHOT-jar-with-dependencies.jar
 ```
 
 Note that bots are unable to respawn, we recommend giving them creative mode.
