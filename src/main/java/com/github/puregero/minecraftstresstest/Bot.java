@@ -17,6 +17,8 @@ public class Bot extends ChannelInboundHandlerAdapter {
 
     private static final Executor ONE_TICK_DELAY = CompletableFuture.delayedExecutor(50,TimeUnit.MILLISECONDS);
 
+    public static double SPEED = 0.2;
+
     public SocketChannel channel;
     private String username;
     private final String address;
@@ -138,12 +140,11 @@ public class Bot extends ChannelInboundHandlerAdapter {
                 yaw = (float) Math.toDegrees(Math.atan2(x - tx, tz - z));
             }
 
-            double speed = 0.2;
-            x += speed * -Math.sin(Math.toRadians(yaw));
-            z += speed * Math.cos(Math.toRadians(yaw));
+            x += SPEED * -Math.sin(Math.toRadians(yaw));
+            z += SPEED * Math.cos(Math.toRadians(yaw));
         }
 
-        y -= 0.01;
+        y -= SPEED / 20;
 
         FriendlyByteBuf movePacket = new FriendlyByteBuf(ctx.alloc().buffer());
         movePacket.writeVarInt(0x12);

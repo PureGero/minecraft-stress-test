@@ -30,11 +30,22 @@ public class MinecraftStressTest {
 
         while (scanner.hasNext()) {
             String line = scanner.nextLine();
+            String[] args = line.split(" ");
 
             try {
-                int botCount = Integer.parseInt(line);
-                System.out.println("Setting bot count to " + botCount);
-                updateBotCount(bots, botCount);
+                if (args[0].equalsIgnoreCase("count") || args[0].equalsIgnoreCase("botcount")) {
+                    int botCount = Integer.parseInt(args[1]);
+                    System.out.println("Setting bot count to " + botCount);
+                    updateBotCount(bots, botCount);
+                } else if (args[0].equalsIgnoreCase("speed")) {
+                    double speed = Double.parseDouble(args[1]);
+                    System.out.println("Setting speed to " + speed);
+                    Bot.SPEED = speed;
+                } else {
+                    System.out.println("Commands:");
+                    System.out.println("count <number of bots>");
+                    System.out.println("speed <0.2>");
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
