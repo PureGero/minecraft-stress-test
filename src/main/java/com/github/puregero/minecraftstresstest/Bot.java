@@ -32,6 +32,7 @@ public class Bot extends ChannelInboundHandlerAdapter {
     private float yaw = 0;
 
     private boolean goUp = false;
+    private boolean goDown = false;
 
     public Bot(String username, String address, int port) {
         this.username = username;
@@ -132,6 +133,9 @@ public class Bot extends ChannelInboundHandlerAdapter {
         if (goUp) {
             y += 0.1;
             goUp = Math.random() < 0.98;
+        } else if (goDown) {
+            y -= 0.1;
+            goDown = Math.random() < 0.98;
         } else {
             if (Math.max(Math.abs(x), Math.abs(z)) > RADIUS) {
                 double tx = Math.random() * RADIUS * 2 - RADIUS;
@@ -189,8 +193,16 @@ public class Bot extends ChannelInboundHandlerAdapter {
             }
 
             // Try going up to go over the block, or turn around and go a different way
-            goUp = Math.random() < 0.5;
-            if (!goUp) yaw = (float) (Math.random() * 360);
+            if (goDown) {
+                goDown = false;
+            } else if (!goUp) {
+                goUp = true;
+            } else {
+                // We hit our head on something
+                goUp = false;
+                goDown = Math.random() < 0.5;
+                if (!goDown) yaw = (float) (Math.random() * 360);
+            }
 
             FriendlyByteBuf teleportConfirmPacket = new FriendlyByteBuf(ctx.alloc().buffer());
             teleportConfirmPacket.writeVarInt(0x00);
