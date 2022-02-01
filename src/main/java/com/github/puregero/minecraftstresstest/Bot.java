@@ -29,7 +29,7 @@ public class Bot extends ChannelInboundHandlerAdapter {
     private double x = 0;
     private double y = 0;
     private double z = 0;
-    private float yaw = 0;
+    private float yaw = (float) (Math.random() * 360);
 
     private boolean goUp = false;
     private boolean goDown = false;
