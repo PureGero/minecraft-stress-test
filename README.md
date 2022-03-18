@@ -46,3 +46,13 @@ java
 ```
 
 Note that bots are unable to respawn, we recommend giving them creative mode.
+
+### Commmands
+
+You can type some commands into the console to control the bots on the fly.
+
+`count 1000`  
+Set the bot count to 1000. This will either connect more bots, or disconnect existing bots as needed.
+
+`speed 0.2`  
+Set the bots' movement speed. The default is 0.2 blocks/tick.
