@@ -102,19 +102,21 @@ public class Bot extends ChannelInboundHandlerAdapter {
         System.out.println(username + " (" + uuid + ") has logged in");
         loginState = false;
 
-        FriendlyByteBuf settingsPacket = new FriendlyByteBuf(ctx.alloc().buffer());
-        settingsPacket.writeVarInt(0x05);
-        settingsPacket.writeUtf("en_GB");
-        settingsPacket.writeByte(2);
-        settingsPacket.writeVarInt(0);
-        settingsPacket.writeBoolean(true);
-        settingsPacket.writeByte(0);
-        settingsPacket.writeVarInt(0);
-        settingsPacket.writeBoolean(false);
-        settingsPacket.writeBoolean(true);
-        ctx.writeAndFlush(settingsPacket);
+        CompletableFuture.delayedExecutor(1000,TimeUnit.MILLISECONDS).execute(() -> {
+            FriendlyByteBuf settingsPacket = new FriendlyByteBuf(ctx.alloc().buffer());
+            settingsPacket.writeVarInt(0x05);
+            settingsPacket.writeUtf("en_GB");
+            settingsPacket.writeByte(2);
+            settingsPacket.writeVarInt(0);
+            settingsPacket.writeBoolean(true);
+            settingsPacket.writeByte(0);
+            settingsPacket.writeVarInt(0);
+            settingsPacket.writeBoolean(false);
+            settingsPacket.writeBoolean(true);
+            ctx.writeAndFlush(settingsPacket);
 
-        CompletableFuture.delayedExecutor(1000,TimeUnit.MILLISECONDS).execute(() -> tick(ctx));
+            CompletableFuture.delayedExecutor(1000, TimeUnit.MILLISECONDS).execute(() -> tick(ctx));
+        });
     }
 
     @Override
@@ -148,7 +150,7 @@ public class Bot extends ChannelInboundHandlerAdapter {
             z += SPEED * Math.cos(Math.toRadians(yaw));
         }
 
-        y -= SPEED / 20;
+        y -= SPEED / 10;
 
         FriendlyByteBuf movePacket = new FriendlyByteBuf(ctx.alloc().buffer());
         movePacket.writeVarInt(0x12);
