@@ -11,13 +11,16 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
 public class Bot extends ChannelInboundHandlerAdapter {
-    private static final int PROTOCOL_VERSION = Integer.parseInt(System.getProperty("bot.protocol.version", "757")); // 757 is 1.18
+    private static final int PROTOCOL_VERSION = Integer.parseInt(System.getProperty("bot.protocol.version", "758")); // 758 is 1.18.2
     private static final double RADIUS = Double.parseDouble(System.getProperty("bot.radius", "1000"));
+    private static final double CENTER_X = Double.parseDouble(System.getProperty("bot.x", "0"));
+    private static final double CENTER_Z = Double.parseDouble(System.getProperty("bot.z", "0"));
     private static final boolean LOGS = Boolean.parseBoolean(System.getProperty("bot.logs", "true"));
+    private static final boolean Y_AXIS = Boolean.parseBoolean(System.getProperty("bot.yaxis", "true"));
 
     private static final Executor ONE_TICK_DELAY = CompletableFuture.delayedExecutor(50,TimeUnit.MILLISECONDS);
 
-    public static double SPEED = 0.2;
+    public static double SPEED = Double.parseDouble(System.getProperty("bot.speed", "0.1"));
 
     public SocketChannel channel;
     private String username;
@@ -132,6 +135,11 @@ public class Bot extends ChannelInboundHandlerAdapter {
 
         if (x == 0 && y == 0 && z == 0) return; // Don't tick until we've spawned in
 
+        if (!Y_AXIS && (goUp || goDown)) {
+            goDown = goUp = false;
+            if (Math.random() < 0.1) yaw = (float) (Math.random() * 360);
+        }
+
         if (goUp) {
             y += 0.1;
             goUp = Math.random() < 0.98;
@@ -139,9 +147,9 @@ public class Bot extends ChannelInboundHandlerAdapter {
             y -= 0.1;
             goDown = Math.random() < 0.98;
         } else {
-            if (Math.max(Math.abs(x), Math.abs(z)) > RADIUS) {
-                double tx = Math.random() * RADIUS * 2 - RADIUS;
-                double tz = Math.random() * RADIUS * 2 - RADIUS;
+            if (Math.max(Math.abs(x - CENTER_X), Math.abs(z - CENTER_Z)) > RADIUS) {
+                double tx = Math.random() * RADIUS * 2 - RADIUS + CENTER_X;
+                double tz = Math.random() * RADIUS * 2 - RADIUS + CENTER_Z;
 
                 yaw = (float) Math.toDegrees(Math.atan2(x - tx, tz - z));
             }
@@ -150,7 +158,9 @@ public class Bot extends ChannelInboundHandlerAdapter {
             z += SPEED * Math.cos(Math.toRadians(yaw));
         }
 
-        y -= SPEED / 10;
+        if (Y_AXIS) {
+            y -= SPEED / 10;
+        }
 
         FriendlyByteBuf movePacket = new FriendlyByteBuf(ctx.alloc().buffer());
         movePacket.writeVarInt(0x12);
@@ -176,6 +186,13 @@ public class Bot extends ChannelInboundHandlerAdapter {
             FriendlyByteBuf keepAlivePacket = new FriendlyByteBuf(ctx.alloc().buffer());
             keepAlivePacket.writeVarInt(0x0F);
             keepAlivePacket.writeLong(id);
+            ctx.writeAndFlush(keepAlivePacket);
+        } else if (packetId == 0x30) {
+            int id = byteBuf.readInt();
+
+            FriendlyByteBuf keepAlivePacket = new FriendlyByteBuf(ctx.alloc().buffer());
+            keepAlivePacket.writeVarInt(0x1D);
+            keepAlivePacket.writeInt(id);
             ctx.writeAndFlush(keepAlivePacket);
         } else if (packetId == 0x38) {
             double dx = byteBuf.readDouble();
@@ -210,6 +227,13 @@ public class Bot extends ChannelInboundHandlerAdapter {
             teleportConfirmPacket.writeVarInt(0x00);
             teleportConfirmPacket.writeVarInt(id);
             ctx.writeAndFlush(teleportConfirmPacket);
+        } else if (packetId == 0x3C) {
+            String url = byteBuf.readUtf();
+            String hash = byteBuf.readUtf();
+            boolean forced = byteBuf.readBoolean();
+            String message = null;
+            if (byteBuf.readBoolean()) message = byteBuf.readUtf();
+            System.out.println("Resource pack info:\n" + url + "\n" + hash + "\n" + forced + "\n" + message);
         }
     }
 

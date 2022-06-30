@@ -60,7 +60,7 @@ public class MinecraftStressTest {
         }
 
         while (bots.size() < botCount) {
-            bots.add(connectBot("Bot" + (bots.size() + 1), ADDRESS, PORT));
+            bots.add(connectBot(System.getProperty("bot.name", "Bot") + (bots.size() + 1), ADDRESS, PORT));
             try {
                 Thread.sleep(DELAY_BETWEEN_BOTS_MS);
             } catch (InterruptedException e) {
