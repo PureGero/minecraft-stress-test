@@ -164,7 +164,7 @@ public class Bot extends ChannelInboundHandlerAdapter {
         }
 
         FriendlyByteBuf movePacket = new FriendlyByteBuf(ctx.alloc().buffer());
-        movePacket.writeVarInt(0x14 );
+        movePacket.writeVarInt(0x14);
         movePacket.writeDouble(x);
         movePacket.writeDouble(y);
         movePacket.writeDouble(z);
@@ -176,7 +176,7 @@ public class Bot extends ChannelInboundHandlerAdapter {
 
     private void channelReadPlay(ChannelHandlerContext ctx, FriendlyByteBuf byteBuf) {
         int packetId = byteBuf.readVarInt();
-        //System.out.println("Analyzing 0x" + Integer.toHexString(packetId));
+//        System.out.println("id 0x" + Integer.toHexString(packetId) + " (" + (dataLength == 0 ? length : dataLength) + ")");
 
         if (packetId == 0x17) {
             System.out.println(username + " (" + uuid + ") was kicked due to " + byteBuf.readUtf());
@@ -189,7 +189,6 @@ public class Bot extends ChannelInboundHandlerAdapter {
             keepAlivePacket.writeLong(id);
             ctx.writeAndFlush(keepAlivePacket);
         } else if (packetId == 0x2D) {
-            System.out.println("Ping");
             int id = byteBuf.readInt();
 
             FriendlyByteBuf keepAlivePacket = new FriendlyByteBuf(ctx.alloc().buffer());
