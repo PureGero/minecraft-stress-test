@@ -1,10 +1,6 @@
 name: CI
 
-on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+on: [ push, pull_request ]
 
 jobs:
   build:
@@ -21,3 +17,7 @@ jobs:
         cache: maven
     - name: Build with Maven
       run: mvn -B package --file pom.xml
+    - name: Upload Jar
+      uses: actions/upload-artifact@v2
+      with:
+        path: target/minecraft-stress-test-*-SNAPSHOT.jar
