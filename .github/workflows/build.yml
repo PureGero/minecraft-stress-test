@@ -20,4 +20,5 @@ jobs:
     - name: Upload Jar
       uses: actions/upload-artifact@v2
       with:
-        path: target/minecraft-stress-test-*-SNAPSHOT.jar
+        name: minecraft-stress-test.jar
+        path: target/minecraft-stress-test-*-jar-with-dependencies.jar 
