@@ -10,6 +10,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
+import com.github.puregero.minecraftstresstest.packets.HandshakePacket;
+
 public class Bot extends ChannelInboundHandlerAdapter {
     private static final int PROTOCOL_VERSION = Integer.parseInt(System.getProperty("bot.protocol.version", "759")); // 759 is 1.19 https://wiki.vg/Protocol_version_numbers
     private static final double RADIUS = Double.parseDouble(System.getProperty("bot.radius", "1000"));
@@ -25,7 +27,7 @@ public class Bot extends ChannelInboundHandlerAdapter {
     public SocketChannel channel;
     private String username;
     private final String address;
-    private final int port;
+    private final short port;
     private UUID uuid;
     private boolean loginState = true;
 
@@ -37,7 +39,7 @@ public class Bot extends ChannelInboundHandlerAdapter {
     private boolean goUp = false;
     private boolean goDown = false;
 
-    public Bot(String username, String address, int port) {
+    public Bot(String username, String address, short port) {
         this.username = username;
         this.address = address;
         this.port = port;
@@ -45,13 +47,14 @@ public class Bot extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelActive(final ChannelHandlerContext ctx) {
-        FriendlyByteBuf handshakePacket = new FriendlyByteBuf(ctx.alloc().buffer());
-        handshakePacket.writeVarInt(0x00);
-        handshakePacket.writeVarInt(PROTOCOL_VERSION);
-        handshakePacket.writeUtf(address);
-        handshakePacket.writeShort(port);
-        handshakePacket.writeVarInt(2);
-        ctx.write(handshakePacket);
+        ctx.write(
+            new HandshakePacket(
+                PROTOCOL_VERSION,
+                this.address,
+                this.port,
+                HandshakePacket.NextState.Login
+            )
+        );
 
         FriendlyByteBuf loginStartPacket = new FriendlyByteBuf(ctx.alloc().buffer());
         loginStartPacket.writeVarInt(0x00);
