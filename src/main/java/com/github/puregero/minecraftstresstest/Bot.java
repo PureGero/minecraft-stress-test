@@ -17,6 +17,7 @@ public class Bot extends ChannelInboundHandlerAdapter {
     private static final double CENTER_Z = Double.parseDouble(System.getProperty("bot.z", "0"));
     private static final boolean LOGS = Boolean.parseBoolean(System.getProperty("bot.logs", "true"));
     private static final boolean Y_AXIS = Boolean.parseBoolean(System.getProperty("bot.yaxis", "true"));
+    private static final int RESOURCE_PACK_RESPONSE = Integer.parseInt(System.getProperty("bot.resource.pack.response", "3"));
 
     private static final Executor ONE_TICK_DELAY = CompletableFuture.delayedExecutor(50,TimeUnit.MILLISECONDS);
 
@@ -235,6 +236,10 @@ public class Bot extends ChannelInboundHandlerAdapter {
             String message = null;
             if (byteBuf.readBoolean()) message = byteBuf.readUtf();
             System.out.println("Resource pack info:\n" + url + "\n" + hash + "\n" + forced + "\n" + message);
+            FriendlyByteBuf resourcePackResponsePacket = new FriendlyByteBuf(ctx.alloc().buffer());
+            resourcePackResponsePacket.writeVarInt(0x24);
+            resourcePackResponsePacket.writeVarInt(RESOURCE_PACK_RESPONSE);
+            ctx.writeAndFlush(resourcePackResponsePacket);
         }
     }
 
