@@ -17,6 +17,7 @@ public class Bot extends ChannelInboundHandlerAdapter {
     private static final double CENTER_Z = Double.parseDouble(System.getProperty("bot.z", "0"));
     private static final boolean LOGS = Boolean.parseBoolean(System.getProperty("bot.logs", "true"));
     private static final boolean Y_AXIS = Boolean.parseBoolean(System.getProperty("bot.yaxis", "true"));
+    private static final int VIEW_DISTANCE = Integer.parseInt(System.getProperty("bot.viewdistance", "2"));
 
     private static final Executor ONE_TICK_DELAY = CompletableFuture.delayedExecutor(50,TimeUnit.MILLISECONDS);
 
@@ -111,7 +112,7 @@ public class Bot extends ChannelInboundHandlerAdapter {
             FriendlyByteBuf settingsPacket = new FriendlyByteBuf(ctx.alloc().buffer());
             settingsPacket.writeVarInt(0x08);
             settingsPacket.writeUtf("en_GB");
-            settingsPacket.writeByte(2);
+            settingsPacket.writeByte(VIEW_DISTANCE);
             settingsPacket.writeVarInt(0);
             settingsPacket.writeBoolean(true);
             settingsPacket.writeByte(0);
