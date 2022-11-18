@@ -11,12 +11,13 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
 public class Bot extends ChannelInboundHandlerAdapter {
-    private static final int PROTOCOL_VERSION = Integer.parseInt(System.getProperty("bot.protocol.version", "759")); // 759 is 1.19 https://wiki.vg/Protocol_version_numbers
+    private static final int PROTOCOL_VERSION = Integer.parseInt(System.getProperty("bot.protocol.version", "760")); // 760 is 1.19.2 https://wiki.vg/Protocol_version_numbers
     private static final double RADIUS = Double.parseDouble(System.getProperty("bot.radius", "1000"));
     private static final double CENTER_X = Double.parseDouble(System.getProperty("bot.x", "0"));
     private static final double CENTER_Z = Double.parseDouble(System.getProperty("bot.z", "0"));
     private static final boolean LOGS = Boolean.parseBoolean(System.getProperty("bot.logs", "true"));
     private static final boolean Y_AXIS = Boolean.parseBoolean(System.getProperty("bot.yaxis", "true"));
+    private static final int VIEW_DISTANCE = Integer.parseInt(System.getProperty("bot.viewdistance", "2"));
     private static final int RESOURCE_PACK_RESPONSE = Integer.parseInt(System.getProperty("bot.resource.pack.response", "3"));
 
     private static final Executor ONE_TICK_DELAY = CompletableFuture.delayedExecutor(50,TimeUnit.MILLISECONDS);
@@ -57,6 +58,7 @@ public class Bot extends ChannelInboundHandlerAdapter {
         FriendlyByteBuf loginStartPacket = new FriendlyByteBuf(ctx.alloc().buffer());
         loginStartPacket.writeVarInt(0x00);
         loginStartPacket.writeUtf(username);
+        loginStartPacket.writeBoolean(false);
         loginStartPacket.writeBoolean(false);
         ctx.writeAndFlush(loginStartPacket);
     }
@@ -109,9 +111,9 @@ public class Bot extends ChannelInboundHandlerAdapter {
 
         CompletableFuture.delayedExecutor(1000,TimeUnit.MILLISECONDS).execute(() -> {
             FriendlyByteBuf settingsPacket = new FriendlyByteBuf(ctx.alloc().buffer());
-            settingsPacket.writeVarInt(0x07);
+            settingsPacket.writeVarInt(0x08);
             settingsPacket.writeUtf("en_GB");
-            settingsPacket.writeByte(2);
+            settingsPacket.writeByte(VIEW_DISTANCE);
             settingsPacket.writeVarInt(0);
             settingsPacket.writeBoolean(true);
             settingsPacket.writeByte(0);
@@ -165,7 +167,7 @@ public class Bot extends ChannelInboundHandlerAdapter {
         }
 
         FriendlyByteBuf movePacket = new FriendlyByteBuf(ctx.alloc().buffer());
-        movePacket.writeVarInt(0x14);
+        movePacket.writeVarInt(0x15);
         movePacket.writeDouble(x);
         movePacket.writeDouble(y);
         movePacket.writeDouble(z);
@@ -179,24 +181,24 @@ public class Bot extends ChannelInboundHandlerAdapter {
         int packetId = byteBuf.readVarInt();
 //        System.out.println("id 0x" + Integer.toHexString(packetId) + " (" + (dataLength == 0 ? length : dataLength) + ")");
 
-        if (packetId == 0x17) {
+        if (packetId == 0x19) {
             System.out.println(username + " (" + uuid + ") was kicked due to " + byteBuf.readUtf());
             ctx.close();
-        } else if (packetId == 0x1E) {
+        } else if (packetId == 0x20) {
             long id = byteBuf.readLong();
 
             FriendlyByteBuf keepAlivePacket = new FriendlyByteBuf(ctx.alloc().buffer());
-            keepAlivePacket.writeVarInt(0x11);
+            keepAlivePacket.writeVarInt(0x12);
             keepAlivePacket.writeLong(id);
             ctx.writeAndFlush(keepAlivePacket);
-        } else if (packetId == 0x2D) {
+        } else if (packetId == 0x2F) {
             int id = byteBuf.readInt();
 
             FriendlyByteBuf keepAlivePacket = new FriendlyByteBuf(ctx.alloc().buffer());
-            keepAlivePacket.writeVarInt(0x1F);
+            keepAlivePacket.writeVarInt(0x20);
             keepAlivePacket.writeInt(id);
             ctx.writeAndFlush(keepAlivePacket);
-        } else if (packetId == 0x36) {
+        } else if (packetId == 0x39) {
             double dx = byteBuf.readDouble();
             double dy = byteBuf.readDouble();
             double dz = byteBuf.readDouble();
@@ -229,7 +231,7 @@ public class Bot extends ChannelInboundHandlerAdapter {
             teleportConfirmPacket.writeVarInt(0x00);
             teleportConfirmPacket.writeVarInt(id);
             ctx.writeAndFlush(teleportConfirmPacket);
-        } else if (packetId == 0x3A) {
+        } else if (packetId == 0x3D) {
             String url = byteBuf.readUtf();
             String hash = byteBuf.readUtf();
             boolean forced = byteBuf.readBoolean();
