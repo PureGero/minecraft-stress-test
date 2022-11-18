@@ -189,11 +189,11 @@ public class Bot extends ChannelInboundHandlerAdapter {
             keepAlivePacket.writeVarInt(0x12);
             keepAlivePacket.writeLong(id);
             ctx.writeAndFlush(keepAlivePacket);
-        } else if (packetId == 0x2D) {
+        } else if (packetId == 0x2F) {
             int id = byteBuf.readInt();
 
             FriendlyByteBuf keepAlivePacket = new FriendlyByteBuf(ctx.alloc().buffer());
-            keepAlivePacket.writeVarInt(0x1F);
+            keepAlivePacket.writeVarInt(0x20);
             keepAlivePacket.writeInt(id);
             ctx.writeAndFlush(keepAlivePacket);
         } else if (packetId == 0x39) {
