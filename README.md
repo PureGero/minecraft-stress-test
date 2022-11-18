@@ -1,6 +1,6 @@
 # minecraft-stress-test
 
-Automate the stress testing of your 1.18 Minecraft server with bots.
+Automate the stress testing of your 1.19.2 Minecraft server with bots.
 This project will log offline-mode bots into the specified server which will
 fly around and explore the world.
 
