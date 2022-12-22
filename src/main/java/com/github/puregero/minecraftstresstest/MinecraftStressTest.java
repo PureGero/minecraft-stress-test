@@ -14,17 +14,18 @@ import java.util.Scanner;
 
 public class MinecraftStressTest {
 
-    private static final int BOT_COUNT = Integer.parseInt(System.getProperty("bot.count", "1"));
     private static final String ADDRESS = System.getProperty("bot.ip", "127.0.0.1");
     private static final int PORT = Integer.parseInt(System.getProperty("bot.port", "25565"));
     private static final int DELAY_BETWEEN_BOTS_MS = Integer.parseInt(System.getProperty("bot.login.delay.ms", "100"));
 
+    private static final String DEFAULT_BOT_COUNT = "1";
+    private static int BOT_COUNT = Integer.parseInt(System.getProperty("bot.count", DEFAULT_BOT_COUNT));
+
+    private static final List<Bot> bots = new ArrayList<>();
     private static final EventLoopGroup workerGroup = new NioEventLoopGroup();
 
     public static void main(String[] a) {
-        List<Bot> bots = new ArrayList<>();
-
-        updateBotCount(bots, BOT_COUNT);
+        updateBotCount();
 
         Scanner scanner = new Scanner(System.in);
 
@@ -36,7 +37,8 @@ public class MinecraftStressTest {
                 if (args[0].equalsIgnoreCase("count") || args[0].equalsIgnoreCase("botcount")) {
                     int botCount = Math.max(0, Integer.parseInt(args[1]));
                     System.out.println("Setting bot count to " + botCount);
-                    updateBotCount(bots, botCount);
+                    BOT_COUNT = botCount;
+                    updateBotCount();
                 } else if (args[0].equalsIgnoreCase("speed")) {
                     double speed = Math.max(0.0, Double.parseDouble(args[1]));
                     System.out.println("Setting speed to " + speed);
@@ -47,7 +49,7 @@ public class MinecraftStressTest {
                     Bot.RADIUS = radius;
                 } else {
                     System.out.println("Commands:");
-                    System.out.println("count <number of bots>");
+                    System.out.println("count <number of bots>   (Default: " + DEFAULT_BOT_COUNT + ")");
                     System.out.println("speed <value>            (Default: " + Bot.DEFAULT_SPEED + ")");
                     System.out.println("radius <value>           (Default: " + Bot.DEFAULT_RADIUS + ")");
                 }
@@ -59,12 +61,12 @@ public class MinecraftStressTest {
         System.out.println("stdin ended");
     }
 
-    private static void updateBotCount(List<Bot> bots, int botCount) {
-        while (bots.size() > botCount) {
+    private static void updateBotCount() {
+        while (bots.size() > BOT_COUNT) {
             bots.remove(bots.size() - 1).close();
         }
 
-        while (bots.size() < botCount) {
+        while (bots.size() < BOT_COUNT) {
             bots.add(connectBot(System.getProperty("bot.name", "Bot") + (bots.size() + 1), ADDRESS, PORT));
             try {
                 Thread.sleep(DELAY_BETWEEN_BOTS_MS);
