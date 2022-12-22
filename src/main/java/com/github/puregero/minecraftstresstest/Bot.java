@@ -50,7 +50,7 @@ public class Bot extends ChannelInboundHandlerAdapter {
     @Override
     public void channelActive(final ChannelHandlerContext ctx) {
         FriendlyByteBuf handshakePacket = new FriendlyByteBuf(ctx.alloc().buffer());
-        handshakePacket.writeVarInt(0x00);
+        handshakePacket.writeVarInt(PacketIds.Serverbound.Handshaking.HANDSHAKE);
         handshakePacket.writeVarInt(PROTOCOL_VERSION);
         handshakePacket.writeUtf(address);
         handshakePacket.writeShort(port);
@@ -58,7 +58,7 @@ public class Bot extends ChannelInboundHandlerAdapter {
         ctx.write(handshakePacket);
 
         FriendlyByteBuf loginStartPacket = new FriendlyByteBuf(ctx.alloc().buffer());
-        loginStartPacket.writeVarInt(0x00);
+        loginStartPacket.writeVarInt(PacketIds.Serverbound.Login.LOGIN_START);
         loginStartPacket.writeUtf(username);
         loginStartPacket.writeBoolean(false);
         loginStartPacket.writeBoolean(false);
@@ -89,14 +89,14 @@ public class Bot extends ChannelInboundHandlerAdapter {
     private void channelReadLogin(ChannelHandlerContext ctx, FriendlyByteBuf byteBuf) {
         int packetId = byteBuf.readVarInt();
 
-        if (packetId == 0) {
+        if (packetId == PacketIds.Clientbound.Login.DISCONNECT) {
             System.out.println(username + " was disconnected during login due to " + byteBuf.readUtf());
             ctx.close();
-        } else if (packetId == 2) {
+        } else if (packetId == PacketIds.Clientbound.Login.LOGIN_SUCCESS) {
             UUID uuid = byteBuf.readUUID();
             String username = byteBuf.readUtf();
             loggedIn(ctx, uuid, username);
-        } else if (packetId == 3) {
+        } else if (packetId == PacketIds.Clientbound.Login.SET_COMPRESSION) {
             byteBuf.readVarInt();
             ctx.pipeline().addAfter("packetDecoder", "compressionDecoder", new CompressionDecoder());
             ctx.pipeline().addAfter("packetEncoder", "compressionEncoder", new CompressionEncoder());
@@ -113,7 +113,7 @@ public class Bot extends ChannelInboundHandlerAdapter {
 
         CompletableFuture.delayedExecutor(1000,TimeUnit.MILLISECONDS).execute(() -> {
             FriendlyByteBuf settingsPacket = new FriendlyByteBuf(ctx.alloc().buffer());
-            settingsPacket.writeVarInt(0x08);
+            settingsPacket.writeVarInt(PacketIds.Serverbound.Play.CLIENT_INFORMATION);
             settingsPacket.writeUtf("en_GB");
             settingsPacket.writeByte(VIEW_DISTANCE);
             settingsPacket.writeVarInt(0);
@@ -169,7 +169,7 @@ public class Bot extends ChannelInboundHandlerAdapter {
         }
 
         FriendlyByteBuf movePacket = new FriendlyByteBuf(ctx.alloc().buffer());
-        movePacket.writeVarInt(0x15);
+        movePacket.writeVarInt(PacketIds.Serverbound.Play.SET_PLAYER_POSITION_AND_ROTATION);
         movePacket.writeDouble(x);
         movePacket.writeDouble(y);
         movePacket.writeDouble(z);
@@ -183,24 +183,24 @@ public class Bot extends ChannelInboundHandlerAdapter {
         int packetId = byteBuf.readVarInt();
 //        System.out.println("id 0x" + Integer.toHexString(packetId) + " (" + (dataLength == 0 ? length : dataLength) + ")");
 
-        if (packetId == 0x19) {
+        if (packetId == PacketIds.Clientbound.Play.DISCONNECT) {
             System.out.println(username + " (" + uuid + ") was kicked due to " + byteBuf.readUtf());
             ctx.close();
-        } else if (packetId == 0x20) {
+        } else if (packetId == PacketIds.Clientbound.Play.KEEP_ALIVE) {
             long id = byteBuf.readLong();
 
             FriendlyByteBuf keepAlivePacket = new FriendlyByteBuf(ctx.alloc().buffer());
-            keepAlivePacket.writeVarInt(0x12);
+            keepAlivePacket.writeVarInt(PacketIds.Serverbound.Play.KEEP_ALIVE);
             keepAlivePacket.writeLong(id);
             ctx.writeAndFlush(keepAlivePacket);
-        } else if (packetId == 0x2F) {
+        } else if (packetId == PacketIds.Clientbound.Play.PING) {
             int id = byteBuf.readInt();
 
             FriendlyByteBuf keepAlivePacket = new FriendlyByteBuf(ctx.alloc().buffer());
-            keepAlivePacket.writeVarInt(0x20);
+            keepAlivePacket.writeVarInt(PacketIds.Serverbound.Play.PONG);
             keepAlivePacket.writeInt(id);
             ctx.writeAndFlush(keepAlivePacket);
-        } else if (packetId == 0x39) {
+        } else if (packetId == PacketIds.Clientbound.Play.SYNCHRONIZE_PLAYER_POSITION) {
             double dx = byteBuf.readDouble();
             double dy = byteBuf.readDouble();
             double dz = byteBuf.readDouble();
@@ -230,10 +230,10 @@ public class Bot extends ChannelInboundHandlerAdapter {
             }
 
             FriendlyByteBuf teleportConfirmPacket = new FriendlyByteBuf(ctx.alloc().buffer());
-            teleportConfirmPacket.writeVarInt(0x00);
+            teleportConfirmPacket.writeVarInt(PacketIds.Serverbound.Play.CONFIRM_TELEPORTATION);
             teleportConfirmPacket.writeVarInt(id);
             ctx.writeAndFlush(teleportConfirmPacket);
-        } else if (packetId == 0x3D) {
+        } else if (packetId == PacketIds.Clientbound.Play.RESOURCE_PACK) {
             String url = byteBuf.readUtf();
             String hash = byteBuf.readUtf();
             boolean forced = byteBuf.readBoolean();
@@ -241,7 +241,7 @@ public class Bot extends ChannelInboundHandlerAdapter {
             if (byteBuf.readBoolean()) message = byteBuf.readUtf();
             System.out.println("Resource pack info:\n" + url + "\n" + hash + "\n" + forced + "\n" + message);
             FriendlyByteBuf resourcePackResponsePacket = new FriendlyByteBuf(ctx.alloc().buffer());
-            resourcePackResponsePacket.writeVarInt(0x24);
+            resourcePackResponsePacket.writeVarInt(PacketIds.Serverbound.Play.RESOURCE_PACK);
             resourcePackResponsePacket.writeVarInt(RESOURCE_PACK_RESPONSE);
             ctx.writeAndFlush(resourcePackResponsePacket);
         }
