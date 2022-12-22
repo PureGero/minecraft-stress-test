@@ -17,11 +17,11 @@ public final class PacketIds {
 		public static final class Play {
 			private Play() {}
 			public static final int
-					DISCONNECT = 0x19,
-					KEEP_ALIVE = 0x20,
-					PING = 0x2F,
-					SYNCHRONIZE_PLAYER_POSITION = 0x39,
-					RESOURCE_PACK = 0x3D;
+					DISCONNECT = 0x17,
+					KEEP_ALIVE = 0x1F,
+					PING = 0x2E,
+					SYNCHRONIZE_PLAYER_POSITION = 0x38,
+					RESOURCE_PACK = 0x3C;
 		}
 
 	}
@@ -45,10 +45,10 @@ public final class PacketIds {
 			private Play() {}
 			public static final int
 					CONFIRM_TELEPORTATION = 0x00,
-					CLIENT_INFORMATION = 0x08,
-					KEEP_ALIVE = 0x12,
-					SET_PLAYER_POSITION_AND_ROTATION = 0x15,
-					PONG = 0x20,
+					CLIENT_INFORMATION = 0x07,
+					KEEP_ALIVE = 0x11,
+					SET_PLAYER_POSITION_AND_ROTATION = 0x14,
+					PONG = 0x1F,
 					RESOURCE_PACK = 0x24;
 		}
 
