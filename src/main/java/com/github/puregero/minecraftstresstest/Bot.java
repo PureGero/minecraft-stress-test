@@ -9,6 +9,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 public class Bot extends ChannelInboundHandlerAdapter {
     private static final int PROTOCOL_VERSION = Integer.parseInt(System.getProperty("bot.protocol.version", "760")); // 760 is 1.19.2 https://wiki.vg/Protocol_version_numbers
@@ -49,20 +50,18 @@ public class Bot extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelActive(final ChannelHandlerContext ctx) {
-        FriendlyByteBuf handshakePacket = new FriendlyByteBuf(ctx.alloc().buffer());
-        handshakePacket.writeVarInt(PacketIds.Serverbound.Handshaking.HANDSHAKE);
-        handshakePacket.writeVarInt(PROTOCOL_VERSION);
-        handshakePacket.writeUtf(address);
-        handshakePacket.writeShort(port);
-        handshakePacket.writeVarInt(2);
-        ctx.write(handshakePacket);
+        sendPacket(ctx, PacketIds.Serverbound.Handshaking.HANDSHAKE, buffer -> {
+            buffer.writeVarInt(PROTOCOL_VERSION);
+            buffer.writeUtf(address);
+            buffer.writeShort(port);
+            buffer.writeVarInt(2);
+        });
 
-        FriendlyByteBuf loginStartPacket = new FriendlyByteBuf(ctx.alloc().buffer());
-        loginStartPacket.writeVarInt(PacketIds.Serverbound.Login.LOGIN_START);
-        loginStartPacket.writeUtf(username);
-        loginStartPacket.writeBoolean(false);
-        loginStartPacket.writeBoolean(false);
-        ctx.writeAndFlush(loginStartPacket);
+        sendPacket(ctx, PacketIds.Serverbound.Login.LOGIN_START, buffer -> {
+            buffer.writeUtf(username);
+            buffer.writeBoolean(false);
+            buffer.writeBoolean(false);
+        });
     }
 
     @Override
@@ -112,17 +111,16 @@ public class Bot extends ChannelInboundHandlerAdapter {
         loginState = false;
 
         CompletableFuture.delayedExecutor(1000,TimeUnit.MILLISECONDS).execute(() -> {
-            FriendlyByteBuf settingsPacket = new FriendlyByteBuf(ctx.alloc().buffer());
-            settingsPacket.writeVarInt(PacketIds.Serverbound.Play.CLIENT_INFORMATION);
-            settingsPacket.writeUtf("en_GB");
-            settingsPacket.writeByte(VIEW_DISTANCE);
-            settingsPacket.writeVarInt(0);
-            settingsPacket.writeBoolean(true);
-            settingsPacket.writeByte(0);
-            settingsPacket.writeVarInt(0);
-            settingsPacket.writeBoolean(false);
-            settingsPacket.writeBoolean(true);
-            ctx.writeAndFlush(settingsPacket);
+            sendPacket(ctx, PacketIds.Serverbound.Play.CLIENT_INFORMATION, buffer -> {
+                buffer.writeUtf("en_GB");
+                buffer.writeByte(VIEW_DISTANCE);
+                buffer.writeVarInt(0);
+                buffer.writeBoolean(true);
+                buffer.writeByte(0);
+                buffer.writeVarInt(0);
+                buffer.writeBoolean(false);
+                buffer.writeBoolean(true);
+            });
 
             CompletableFuture.delayedExecutor(1000, TimeUnit.MILLISECONDS).execute(() -> tick(ctx));
         });
@@ -168,15 +166,14 @@ public class Bot extends ChannelInboundHandlerAdapter {
             y -= SPEED / 10;
         }
 
-        FriendlyByteBuf movePacket = new FriendlyByteBuf(ctx.alloc().buffer());
-        movePacket.writeVarInt(PacketIds.Serverbound.Play.SET_PLAYER_POSITION_AND_ROTATION);
-        movePacket.writeDouble(x);
-        movePacket.writeDouble(y);
-        movePacket.writeDouble(z);
-        movePacket.writeFloat(yaw);
-        movePacket.writeFloat(0);
-        movePacket.writeBoolean(true);
-        ctx.writeAndFlush(movePacket);
+        sendPacket(ctx, PacketIds.Serverbound.Play.SET_PLAYER_POSITION_AND_ROTATION, buffer -> {
+            buffer.writeDouble(x);
+            buffer.writeDouble(y);
+            buffer.writeDouble(z);
+            buffer.writeFloat(yaw);
+            buffer.writeFloat(0);
+            buffer.writeBoolean(true);
+        });
     }
 
     private void channelReadPlay(ChannelHandlerContext ctx, FriendlyByteBuf byteBuf) {
@@ -189,17 +186,11 @@ public class Bot extends ChannelInboundHandlerAdapter {
         } else if (packetId == PacketIds.Clientbound.Play.KEEP_ALIVE) {
             long id = byteBuf.readLong();
 
-            FriendlyByteBuf keepAlivePacket = new FriendlyByteBuf(ctx.alloc().buffer());
-            keepAlivePacket.writeVarInt(PacketIds.Serverbound.Play.KEEP_ALIVE);
-            keepAlivePacket.writeLong(id);
-            ctx.writeAndFlush(keepAlivePacket);
+            sendPacket(ctx, PacketIds.Serverbound.Play.KEEP_ALIVE, buffer -> buffer.writeLong(id));
         } else if (packetId == PacketIds.Clientbound.Play.PING) {
             int id = byteBuf.readInt();
 
-            FriendlyByteBuf keepAlivePacket = new FriendlyByteBuf(ctx.alloc().buffer());
-            keepAlivePacket.writeVarInt(PacketIds.Serverbound.Play.PONG);
-            keepAlivePacket.writeInt(id);
-            ctx.writeAndFlush(keepAlivePacket);
+            sendPacket(ctx, PacketIds.Serverbound.Play.PONG, buffer -> buffer.writeInt(id));
         } else if (packetId == PacketIds.Clientbound.Play.SYNCHRONIZE_PLAYER_POSITION) {
             double dx = byteBuf.readDouble();
             double dy = byteBuf.readDouble();
@@ -229,10 +220,7 @@ public class Bot extends ChannelInboundHandlerAdapter {
                 if (!goDown) yaw = (float) (Math.random() * 360);
             }
 
-            FriendlyByteBuf teleportConfirmPacket = new FriendlyByteBuf(ctx.alloc().buffer());
-            teleportConfirmPacket.writeVarInt(PacketIds.Serverbound.Play.CONFIRM_TELEPORTATION);
-            teleportConfirmPacket.writeVarInt(id);
-            ctx.writeAndFlush(teleportConfirmPacket);
+            sendPacket(ctx, PacketIds.Serverbound.Play.CONFIRM_TELEPORTATION, buffer -> buffer.writeVarInt(id));
         } else if (packetId == PacketIds.Clientbound.Play.RESOURCE_PACK) {
             String url = byteBuf.readUtf();
             String hash = byteBuf.readUtf();
@@ -240,14 +228,19 @@ public class Bot extends ChannelInboundHandlerAdapter {
             String message = null;
             if (byteBuf.readBoolean()) message = byteBuf.readUtf();
             System.out.println("Resource pack info:\n" + url + "\n" + hash + "\n" + forced + "\n" + message);
-            FriendlyByteBuf resourcePackResponsePacket = new FriendlyByteBuf(ctx.alloc().buffer());
-            resourcePackResponsePacket.writeVarInt(PacketIds.Serverbound.Play.RESOURCE_PACK);
-            resourcePackResponsePacket.writeVarInt(RESOURCE_PACK_RESPONSE);
-            ctx.writeAndFlush(resourcePackResponsePacket);
+
+            sendPacket(ctx, PacketIds.Serverbound.Play.RESOURCE_PACK, buffer -> buffer.writeVarInt(RESOURCE_PACK_RESPONSE));
         }
     }
 
     public void close() {
         channel.close();
+    }
+
+    public static void sendPacket(ChannelHandlerContext ctx, int packetId, Consumer<FriendlyByteBuf> applyToBuffer) {
+        FriendlyByteBuf buffer = new FriendlyByteBuf(ctx.alloc().buffer());
+        buffer.writeVarInt(packetId);
+        applyToBuffer.accept(buffer);
+        ctx.writeAndFlush(buffer);
     }
 }
