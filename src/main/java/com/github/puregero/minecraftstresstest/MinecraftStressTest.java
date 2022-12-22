@@ -44,7 +44,7 @@ public class MinecraftStressTest {
                 } else {
                     System.out.println("Commands:");
                     System.out.println("count <number of bots>");
-                    System.out.println("speed <0.2>");
+                    System.out.println("speed <value>            (Default: " + Bot.DEFAULT_SPEED + ")");
                 }
             } catch (Exception e) {
                 e.printStackTrace();

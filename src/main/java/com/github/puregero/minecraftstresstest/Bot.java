@@ -22,7 +22,8 @@ public class Bot extends ChannelInboundHandlerAdapter {
 
     private static final Executor ONE_TICK_DELAY = CompletableFuture.delayedExecutor(50,TimeUnit.MILLISECONDS);
 
-    public static double SPEED = Double.parseDouble(System.getProperty("bot.speed", "0.1"));
+    public static final String DEFAULT_SPEED = "0.1";
+    public static double SPEED = Double.parseDouble(System.getProperty("bot.speed", DEFAULT_SPEED));
 
     public SocketChannel channel;
     private String username;
