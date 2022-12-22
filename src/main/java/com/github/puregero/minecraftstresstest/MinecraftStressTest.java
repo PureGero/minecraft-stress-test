@@ -34,15 +34,15 @@ public class MinecraftStressTest {
 
             try {
                 if (args[0].equalsIgnoreCase("count") || args[0].equalsIgnoreCase("botcount")) {
-                    int botCount = Integer.parseInt(args[1]);
+                    int botCount = Math.max(0, Integer.parseInt(args[1]));
                     System.out.println("Setting bot count to " + botCount);
                     updateBotCount(bots, botCount);
                 } else if (args[0].equalsIgnoreCase("speed")) {
-                    double speed = Double.parseDouble(args[1]);
+                    double speed = Math.max(0.0, Double.parseDouble(args[1]));
                     System.out.println("Setting speed to " + speed);
                     Bot.SPEED = speed;
                 } else if (args[0].equalsIgnoreCase("radius")) {
-                    double radius = Double.parseDouble(args[1]);
+                    double radius = Math.max(0.0, Double.parseDouble(args[1]));
                     System.out.println("Setting radius to " + radius);
                     Bot.RADIUS = radius;
                 } else {
@@ -60,7 +60,7 @@ public class MinecraftStressTest {
     }
 
     private static void updateBotCount(List<Bot> bots, int botCount) {
-        while (bots.size() > botCount && !bots.isEmpty()) {
+        while (bots.size() > botCount) {
             bots.remove(bots.size() - 1).close();
         }
 
