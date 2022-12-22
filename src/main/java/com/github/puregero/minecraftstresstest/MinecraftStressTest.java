@@ -11,6 +11,11 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class MinecraftStressTest {
 
@@ -22,6 +27,9 @@ public class MinecraftStressTest {
     private static int BOT_COUNT = Integer.parseInt(System.getProperty("bot.count", DEFAULT_BOT_COUNT));
 
     private static final List<Bot> bots = new ArrayList<>();
+    private static final Lock botsLock = new ReentrantLock();
+    private static final AtomicBoolean addingBots = new AtomicBoolean();
+
     private static final EventLoopGroup workerGroup = new NioEventLoopGroup();
 
     public static void main(String[] a) {
@@ -62,16 +70,44 @@ public class MinecraftStressTest {
     }
 
     private static void updateBotCount() {
-        while (bots.size() > BOT_COUNT) {
-            bots.remove(bots.size() - 1).close();
-        }
+        removeBotsIfNeeded();
+        addBotIfNeeded(true);
+    }
 
-        while (bots.size() < BOT_COUNT) {
-            bots.add(connectBot(System.getProperty("bot.name", "Bot") + (bots.size() + 1), ADDRESS, PORT));
+    private static void removeBotsIfNeeded() {
+        botsLock.lock();
+        while (true) {
+            Bot removedBot;
             try {
-                Thread.sleep(DELAY_BETWEEN_BOTS_MS);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+                if (bots.size() <= BOT_COUNT) {
+                    break;
+                }
+                removedBot = bots.remove(bots.size() - 1);
+            } finally {
+                botsLock.unlock();
+            }
+            removedBot.close();
+        }
+    }
+
+    private static void addBotIfNeeded(boolean firstCall) {
+        if (!firstCall || !addingBots.getAndSet(true)) {
+            boolean scheduledNextCall = false;
+            try {
+                botsLock.lock();
+                try {
+                    if (bots.size() < BOT_COUNT) {
+                        bots.add(connectBot(System.getProperty("bot.name", "Bot") + (bots.size() + 1), ADDRESS, PORT));
+                        CompletableFuture.delayedExecutor(DELAY_BETWEEN_BOTS_MS, TimeUnit.MILLISECONDS).execute(() -> addBotIfNeeded(false));
+                        scheduledNextCall = true;
+                    }
+                } finally {
+                    botsLock.unlock();
+                }
+            } finally {
+                if (!scheduledNextCall) {
+                    addingBots.set(false);
+                }
             }
         }
     }
