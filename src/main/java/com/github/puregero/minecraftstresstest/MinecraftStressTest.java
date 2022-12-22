@@ -41,10 +41,15 @@ public class MinecraftStressTest {
                     double speed = Double.parseDouble(args[1]);
                     System.out.println("Setting speed to " + speed);
                     Bot.SPEED = speed;
+                } else if (args[0].equalsIgnoreCase("radius")) {
+                    double radius = Double.parseDouble(args[1]);
+                    System.out.println("Setting radius to " + radius);
+                    Bot.RADIUS = radius;
                 } else {
                     System.out.println("Commands:");
                     System.out.println("count <number of bots>");
                     System.out.println("speed <value>            (Default: " + Bot.DEFAULT_SPEED + ")");
+                    System.out.println("radius <value>           (Default: " + Bot.DEFAULT_RADIUS + ")");
                 }
             } catch (Exception e) {
                 e.printStackTrace();

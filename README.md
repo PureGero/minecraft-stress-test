@@ -56,3 +56,6 @@ Set the bot count to 1000. This will either connect more bots, or disconnect exi
 
 `speed 0.2`  
 Set the bots' movement speed. The default is 0.2 blocks/tick.
+
+`radius 600`  
+Set the radius of the area the bots can move around in. The default is 1000 blocks.

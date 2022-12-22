@@ -12,7 +12,6 @@ import java.util.concurrent.TimeUnit;
 
 public class Bot extends ChannelInboundHandlerAdapter {
     private static final int PROTOCOL_VERSION = Integer.parseInt(System.getProperty("bot.protocol.version", "760")); // 760 is 1.19.2 https://wiki.vg/Protocol_version_numbers
-    private static final double RADIUS = Double.parseDouble(System.getProperty("bot.radius", "1000"));
     private static final double CENTER_X = Double.parseDouble(System.getProperty("bot.x", "0"));
     private static final double CENTER_Z = Double.parseDouble(System.getProperty("bot.z", "0"));
     private static final boolean LOGS = Boolean.parseBoolean(System.getProperty("bot.logs", "true"));
@@ -24,6 +23,8 @@ public class Bot extends ChannelInboundHandlerAdapter {
 
     public static final String DEFAULT_SPEED = "0.1";
     public static double SPEED = Double.parseDouble(System.getProperty("bot.speed", DEFAULT_SPEED));
+    public static final String DEFAULT_RADIUS = "1000";
+    public static double RADIUS = Double.parseDouble(System.getProperty("bot.radius", DEFAULT_RADIUS));
 
     public SocketChannel channel;
     private String username;
