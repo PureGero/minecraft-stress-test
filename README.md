@@ -1,6 +1,6 @@
 # minecraft-stress-test
 
-Automate the stress testing of your 1.19.2 Minecraft server with bots.
+Automate the stress testing of your 1.19.3 Minecraft server with bots.
 This project will log offline-mode bots into the specified server which will
 fly around and explore the world.
 
@@ -55,4 +55,7 @@ You can type some commands into the console to control the bots on the fly.
 Set the bot count to 1000. This will either connect more bots, or disconnect existing bots as needed.
 
 `speed 0.2`  
-Set the bots' movement speed. The default is 0.2 blocks/tick.
+Set the bots' movement speed. The default is 0.1 blocks/tick.
+
+`radius 600`  
+Set the radius of the area the bots can move around in. The default is 1000 blocks.
