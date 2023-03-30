@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 public class Bot extends ChannelInboundHandlerAdapter {
-    private static final int PROTOCOL_VERSION = Integer.parseInt(System.getProperty("bot.protocol.version", "761")); // 761 is 1.19.3 https://wiki.vg/Protocol_version_numbers
+    private static final int PROTOCOL_VERSION = Integer.parseInt(System.getProperty("bot.protocol.version", "762")); // 762 is 1.19.4 https://wiki.vg/Protocol_version_numbers
     private static final double CENTER_X = Double.parseDouble(System.getProperty("bot.x", "0"));
     private static final double CENTER_Z = Double.parseDouble(System.getProperty("bot.z", "0"));
     private static final boolean LOGS = Boolean.parseBoolean(System.getProperty("bot.logs", "true"));
