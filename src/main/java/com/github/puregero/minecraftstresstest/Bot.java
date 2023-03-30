@@ -109,20 +109,20 @@ public class Bot extends ChannelInboundHandlerAdapter {
         System.out.println(username + " (" + uuid + ") has logged in");
         loginState = false;
 
-        CompletableFuture.delayedExecutor(1000,TimeUnit.MILLISECONDS).execute(() -> {
-            sendPacket(ctx, PacketIds.Serverbound.Play.CLIENT_INFORMATION, buffer -> {
-                buffer.writeUtf("en_GB");
-                buffer.writeByte(VIEW_DISTANCE);
-                buffer.writeVarInt(0);
-                buffer.writeBoolean(true);
-                buffer.writeByte(0);
-                buffer.writeVarInt(0);
-                buffer.writeBoolean(false);
-                buffer.writeBoolean(true);
-            });
-
-            CompletableFuture.delayedExecutor(1000, TimeUnit.MILLISECONDS).execute(() -> tick(ctx));
-        });
+        //CompletableFuture.delayedExecutor(12000,TimeUnit.MILLISECONDS).execute(() -> {
+         //   sendPacket(ctx, PacketIds.Serverbound.Play.CLIENT_INFORMATION, buffer -> {
+           //     buffer.writeUtf("en_GB");
+          //      buffer.writeByte(VIEW_DISTANCE);
+          //      buffer.writeVarInt(0);
+          //      buffer.writeBoolean(true);
+         //       buffer.writeByte(0);
+         //       buffer.writeVarInt(0);
+        //        buffer.writeBoolean(false);
+        //        buffer.writeBoolean(true);
+        //    });
+//
+        CompletableFuture.delayedExecutor(1000, TimeUnit.MILLISECONDS).execute(() -> tick(ctx));
+        //});
     }
 
     @Override
