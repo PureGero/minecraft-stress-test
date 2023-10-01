@@ -1,3 +1,87 @@
+# Eclipse stuff
+.classpath
+.project
+.settings/
+
+# netbeans
+nbproject/
+nbactions.xml
+
+# we use maven!
+build.xml
+
+# maven
+target/
+dependency-reduced-pom.xml
+
+# vim
+.*.sw[a-p]
+
+# various other potential build files
+build/
+bin/
+dist/
+manifest.mf
+
+# Mac filesystem dust
 .DS_Store
-.idea
-target
+
+# intellij
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# other files
+*.log*
+
+# delombok
+*/src/main/lombok
+ethan@Alfred ~ % cat MultiPaper/.gitignore
+.gradle/
+build/
+
+# Eclipse stuff
+.classpath
+.project
+.settings/
+
+# VSCode stuff
+.vscode/
+
+# netbeans
+nbproject/
+nbactions.xml
+
+# we use maven!
+build.xml
+
+# maven
+target/
+dependency-reduced-pom.xml
+
+# vim
+.*.sw[a-p]
+
+# various other potential build files
+build/
+bin/
+dist/
+manifest.mf
+
+# Mac filesystem dust
+.DS_Store/
+.DS_Store
+
+# intellij
+*.iml
+*.ipr
+*.iws
+.idea/
+out/
+
+# Linux temp files
+*~
+
+# Scripts
+*.sh
