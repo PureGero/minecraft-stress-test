@@ -22,13 +22,14 @@ public final class PacketIds {
             private Play() {
             }
 
+            //client outbound
             public static final int
-                    DISCONNECT = 0x1A,  //conv
-                    KEEP_ALIVE = 0x23,  //conv
-                    PING = 0x32,  //conv
-                    SYNCHRONIZE_PLAYER_POSITION = 0x3C,  //conv
-                    RESOURCE_PACK = 0x40,  //conv
-                    SET_HEALTH = 0x57;  //conv
+                    DISCONNECT = 0x1B,  //ok +1
+                    KEEP_ALIVE = 0x24,  //ok +1
+                    PING = 0x33,  //ok +1
+                    SYNCHRONIZE_PLAYER_POSITION = 0x3E,  //ok +2
+                    RESOURCE_PACK = 0x43,  //ok +3
+                    SET_HEALTH = 0x5B;  //ok
         }
 
     }
@@ -50,21 +51,23 @@ public final class PacketIds {
             }
 
             public static final int
-                    LOGIN_START = 0x00;
+                    LOGIN_START = 0x00,
+            LOGIN_ACKNOWLEDGED = 0x03;
         }
 
         public static final class Play {
             private Play() {
             }
 
+            //server outbound
             public static final int
                     CONFIRM_TELEPORTATION = 0x00, //same
-                    CLIENT_RESPAWN = 0x07,  //conv
-                    CLIENT_INFORMATION = 0x08, //conv
-                    KEEP_ALIVE = 0x12, //conv
-                    SET_PLAYER_POSITION_AND_ROTATION = 0x15, //conv
-                    PONG = 0x20,  //conv
-                    RESOURCE_PACK = 0x24; //same
+                    CLIENT_RESPAWN = 0x08,  //....
+                    CLIENT_INFORMATION = 0x00, //ok
+                    KEEP_ALIVE = 0x15, //ok
+                    SET_PLAYER_POSITION_AND_ROTATION = 0x18, //ok
+                    PONG = 0x24,  //ok
+                    RESOURCE_PACK = 0x28; //ok
         }
 
     }
