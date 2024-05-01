@@ -12,7 +12,6 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-import static java.lang.Thread.sleep;
 
 public class Bot extends ChannelInboundHandlerAdapter {
     private static final int PROTOCOL_VERSION = Integer.parseInt(System.getProperty("bot.protocol.version", "766")); // 761 is 1.19.3 https://wiki.vg/Protocol_version_numbers
@@ -65,7 +64,6 @@ public class Bot extends ChannelInboundHandlerAdapter {
 
         sendPacket(ctx, PacketIds.Serverbound.Login.LOGIN_START, buffer -> {
             buffer.writeUtf(username);
-            //   buffer.writeBoolean(false);
             buffer.writeUUID(UUID.nameUUIDFromBytes(("OfflinePlayer:" + username).getBytes(StandardCharsets.UTF_8)));
         });
     }
@@ -102,16 +100,20 @@ public class Bot extends ChannelInboundHandlerAdapter {
         if (packetId == PacketIds.Clientbound.Login.DISCONNECT) {
             System.out.println(username + " was disconnected during login due to " + byteBuf.readUtf());
             ctx.close();
+
+        } else if (packetId == PacketIds.Clientbound.Login.ENCRYPTION_REQUEST) {
+            System.out.println("Server requesting for ENCRYPTION_REQUEST, so it is on ONLINEMODE, disconnecting");
+            ctx.close();
+
         } else if (packetId == PacketIds.Clientbound.Login.LOGIN_SUCCESS) {
-            UUID uuid = byteBuf.readUUID();
-            String username = byteBuf.readUtf();
 
             if (PROTOCOL_VERSION >= 764) {
                 sendPacket(ctx, PacketIds.Serverbound.Login.LOGIN_ACKNOWLEDGED, buffer -> {
                 });
             }
 
-            loggedIn(ctx, uuid, username);
+            loggedIn(ctx, byteBuf);
+
         } else if (packetId == PacketIds.Clientbound.Login.SET_COMPRESSION) {
             byteBuf.readVarInt();
             ctx.pipeline().addAfter("packetDecoder", "compressionDecoder", new CompressionDecoder());
@@ -122,10 +124,31 @@ public class Bot extends ChannelInboundHandlerAdapter {
     }
 
 
-    private void loggedIn(ChannelHandlerContext ctx, UUID uuid, String username) {
+    private void loggedIn(ChannelHandlerContext ctx, FriendlyByteBuf byteBuf) {
+        UUID uuid = byteBuf.readUUID();
+        String username = byteBuf.readUtf();
+        int numberElements = byteBuf.readVarInt(); //number of elements after this position
+        boolean isSigned = false;
+
+        if (numberElements > 0) {
+            try {
+                byteBuf.readUtf(); //name
+                byteBuf.readUtf(); //value
+                isSigned = byteBuf.readBoolean(); //issigned
+            } catch (Exception e) {
+            }
+        }
+
         this.uuid = uuid;
         this.username = username;
-        System.out.println(username + " (" + uuid + ") has logged in");
+
+        if (isSigned) {
+            System.out.println(username + " (" + uuid + ") has logged in on an ONLINEMODE server, stopping");
+            ctx.close();
+            return;
+        } else
+            System.out.println(username + " (" + uuid + ") has logged in");
+
         loginState = false;
         configState = true;
         //System.out.println("changing to config mode");
@@ -211,23 +234,23 @@ public class Bot extends ChannelInboundHandlerAdapter {
             ctx.close();
 
         } else if (packetId == PacketIds.Clientbound.Configuration.FINISH_CONFIGURATION) {
-            //System.out.println("changing to play mode");
 
             sendPacket(ctx, PacketIds.Serverbound.Configuration.FINISH_CONFIGURATION, buffer -> {
             });
 
             configState = false;
             playState = true;
+            //System.out.println("changing to play mode");
 
         } else if (packetId == PacketIds.Clientbound.Configuration.KEEP_ALIVE) {
             long id = byteBuf.readLong();
             sendPacket(ctx, PacketIds.Serverbound.Configuration.KEEP_ALIVE, buffer -> buffer.writeLong(id));
-            System.out.println(username + " (" + uuid + ") keep alive config mode");
+            //System.out.println(username + " (" + uuid + ") keep alive config mode");
 
         } else if (packetId == PacketIds.Clientbound.Configuration.PING) {
             int id = byteBuf.readInt();
             sendPacket(ctx, PacketIds.Serverbound.Configuration.PONG, buffer -> buffer.writeInt(id));
-            System.out.println(username + " (" + uuid + ") ping config mode");
+            //System.out.println(username + " (" + uuid + ") ping config mode");
 
         }
     }
@@ -235,8 +258,6 @@ public class Bot extends ChannelInboundHandlerAdapter {
 
     private void channelReadPlay(ChannelHandlerContext ctx, FriendlyByteBuf byteBuf) {
         int packetId = byteBuf.readVarInt();
-
-        //    System.out.println("id 0x" + Integer.toHexString(packetId));
 
         if (packetId == PacketIds.Clientbound.Play.DISCONNECT) {
             System.out.println(username + " (" + uuid + ") was kicked due to " + byteBuf.readUtf());
