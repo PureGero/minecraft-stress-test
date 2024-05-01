@@ -18,18 +18,29 @@ public final class PacketIds {
                     SET_COMPRESSION = 0x03;
         }
 
+        public static final class Configuration {
+            private Configuration() {
+            }
+
+            public static final int
+                    DISCONNECT = 0x02,
+                    FINISH_CONFIGURATION = 0x03,
+                    KEEP_ALIVE = 0x04,
+                    PING = 0x05;
+        }
+
         public static final class Play {
             private Play() {
             }
 
             //client outbound
             public static final int
-                    DISCONNECT = 0x1B,  //ok +1
-                    KEEP_ALIVE = 0x24,  //ok +1
-                    PING = 0x33,  //ok +1
-                    SYNCHRONIZE_PLAYER_POSITION = 0x3E,  //ok +2
-                    RESOURCE_PACK = 0x43,  //ok +3
-                    SET_HEALTH = 0x5B;  //ok
+                    DISCONNECT = 0x1D,
+                    KEEP_ALIVE = 0x26,
+                    PING = 0x35,
+                    SYNCHRONIZE_PLAYER_POSITION = 0x40,
+                    RESOURCE_PACK = 0x46,
+                    SET_HEALTH = 0x5D;
         }
 
     }
@@ -52,22 +63,32 @@ public final class PacketIds {
 
             public static final int
                     LOGIN_START = 0x00,
-            LOGIN_ACKNOWLEDGED = 0x03;
+                    LOGIN_ACKNOWLEDGED = 0x03;
+        }
+
+        public static final class Configuration {
+            private Configuration() {
+            }
+
+            public static final int
+                    CLIENT_INFORMATION = 0x00,
+                    FINISH_CONFIGURATION = 0x03,
+                    KEEP_ALIVE = 0x04,
+                    PONG = 0x05,
+                    KNOWN_PACKS = 0x07;
         }
 
         public static final class Play {
             private Play() {
             }
 
-            //server outbound
             public static final int
-                    CONFIRM_TELEPORTATION = 0x00, //same
-                    CLIENT_RESPAWN = 0x08,  //....
-                    CLIENT_INFORMATION = 0x00, //ok
-                    KEEP_ALIVE = 0x15, //ok
-                    SET_PLAYER_POSITION_AND_ROTATION = 0x18, //ok
-                    PONG = 0x24,  //ok
-                    RESOURCE_PACK = 0x28; //ok
+                    CONFIRM_TELEPORTATION = 0x00,
+                    CLIENT_RESPAWN = 0x08,
+                    KEEP_ALIVE = 0x18,
+                    SET_PLAYER_POSITION_AND_ROTATION = 0x1B,
+                    PONG = 0x27,
+                    RESOURCE_PACK = 0x2B;
         }
 
     }

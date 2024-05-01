@@ -15,7 +15,7 @@ import java.util.function.Consumer;
 import static java.lang.Thread.sleep;
 
 public class Bot extends ChannelInboundHandlerAdapter {
-    private static final int PROTOCOL_VERSION = Integer.parseInt(System.getProperty("bot.protocol.version", "765")); // 761 is 1.19.3 https://wiki.vg/Protocol_version_numbers
+    private static final int PROTOCOL_VERSION = Integer.parseInt(System.getProperty("bot.protocol.version", "766")); // 761 is 1.19.3 https://wiki.vg/Protocol_version_numbers
     private static final double CENTER_X = Double.parseDouble(System.getProperty("bot.x", "0"));
     private static final double CENTER_Z = Double.parseDouble(System.getProperty("bot.z", "0"));
     private static final boolean LOGS = Boolean.parseBoolean(System.getProperty("bot.logs", "true"));
@@ -131,16 +131,20 @@ public class Bot extends ChannelInboundHandlerAdapter {
         //System.out.println("changing to config mode");
 
         CompletableFuture.delayedExecutor(1000, TimeUnit.MILLISECONDS).execute(() -> {
-//            sendPacket(ctx, PacketIds.Serverbound.Play.CLIENT_INFORMATION, buffer -> {
-//                buffer.writeUtf("en_GB");
-//                buffer.writeByte(VIEW_DISTANCE);
-//                buffer.writeVarInt(0);
-//                buffer.writeBoolean(true);
-//                buffer.writeByte(0);
-//                buffer.writeVarInt(0);
-//                buffer.writeBoolean(false);
-//                buffer.writeBoolean(true);
-//            });
+            sendPacket(ctx, PacketIds.Serverbound.Configuration.CLIENT_INFORMATION, buffer -> {
+                buffer.writeUtf("en_GB");
+                buffer.writeByte(VIEW_DISTANCE);
+                buffer.writeVarInt(0);
+                buffer.writeBoolean(true);
+                buffer.writeByte(0);
+                buffer.writeVarInt(0);
+                buffer.writeBoolean(false);
+                buffer.writeBoolean(true);
+            });
+
+            sendPacket(ctx, PacketIds.Serverbound.Configuration.KNOWN_PACKS, buffer -> {
+                buffer.writeVarInt(0);
+            });
 
             CompletableFuture.delayedExecutor(1000, TimeUnit.MILLISECONDS).execute(() -> tick(ctx));
         });
@@ -202,27 +206,27 @@ public class Bot extends ChannelInboundHandlerAdapter {
     private void channelReadConfig(ChannelHandlerContext ctx, FriendlyByteBuf byteBuf) {
         int packetId = byteBuf.readVarInt();
 
-        if (packetId == 1) {
+        if (packetId == PacketIds.Clientbound.Configuration.DISCONNECT) {
             System.out.println(username + " (" + uuid + ") (config) was kicked due to " + byteBuf.readUtf());
             ctx.close();
 
-        } else if (packetId == 2) {
+        } else if (packetId == PacketIds.Clientbound.Configuration.FINISH_CONFIGURATION) {
             //System.out.println("changing to play mode");
 
-            sendPacket(ctx, 2, buffer -> {
+            sendPacket(ctx, PacketIds.Serverbound.Configuration.FINISH_CONFIGURATION, buffer -> {
             });
 
             configState = false;
             playState = true;
 
-        } else if (packetId == 3) {
+        } else if (packetId == PacketIds.Clientbound.Configuration.KEEP_ALIVE) {
             long id = byteBuf.readLong();
-            sendPacket(ctx, 3, buffer -> buffer.writeLong(id));
+            sendPacket(ctx, PacketIds.Serverbound.Configuration.KEEP_ALIVE, buffer -> buffer.writeLong(id));
             System.out.println(username + " (" + uuid + ") keep alive config mode");
 
-        } else if (packetId == 4) {
+        } else if (packetId == PacketIds.Clientbound.Configuration.PING) {
             int id = byteBuf.readInt();
-            sendPacket(ctx, 4, buffer -> buffer.writeInt(id));
+            sendPacket(ctx, PacketIds.Serverbound.Configuration.PONG, buffer -> buffer.writeInt(id));
             System.out.println(username + " (" + uuid + ") ping config mode");
 
         }
