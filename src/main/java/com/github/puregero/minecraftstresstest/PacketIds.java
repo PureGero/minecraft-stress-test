@@ -14,6 +14,7 @@ public final class PacketIds {
 
             public static final int
                     DISCONNECT = 0x00,
+                    ENCRYPTION_REQUEST = 0x01,
                     LOGIN_SUCCESS = 0x02,
                     SET_COMPRESSION = 0x03;
         }
