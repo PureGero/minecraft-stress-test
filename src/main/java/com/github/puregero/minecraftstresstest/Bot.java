@@ -154,20 +154,22 @@ public class Bot extends ChannelInboundHandlerAdapter {
         //System.out.println("changing to config mode");
 
         CompletableFuture.delayedExecutor(1000, TimeUnit.MILLISECONDS).execute(() -> {
-            sendPacket(ctx, PacketIds.Serverbound.Configuration.CLIENT_INFORMATION, buffer -> {
-                buffer.writeUtf("en_GB");
-                buffer.writeByte(VIEW_DISTANCE);
-                buffer.writeVarInt(0);
-                buffer.writeBoolean(true);
-                buffer.writeByte(0);
-                buffer.writeVarInt(0);
-                buffer.writeBoolean(false);
-                buffer.writeBoolean(true);
-            });
+            if (configState) {
+                sendPacket(ctx, PacketIds.Serverbound.Configuration.CLIENT_INFORMATION, buffer -> {
+                    buffer.writeUtf("en_GB");
+                    buffer.writeByte(VIEW_DISTANCE);
+                    buffer.writeVarInt(0);
+                    buffer.writeBoolean(true);
+                    buffer.writeByte(0);
+                    buffer.writeVarInt(0);
+                    buffer.writeBoolean(false);
+                    buffer.writeBoolean(true);
+                });
 
-            sendPacket(ctx, PacketIds.Serverbound.Configuration.KNOWN_PACKS, buffer -> {
-                buffer.writeVarInt(0);
-            });
+                sendPacket(ctx, PacketIds.Serverbound.Configuration.KNOWN_PACKS, buffer -> {
+                    buffer.writeVarInt(0);
+                });
+            }
 
             CompletableFuture.delayedExecutor(1000, TimeUnit.MILLISECONDS).execute(() -> tick(ctx));
         });
