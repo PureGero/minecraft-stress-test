@@ -85,7 +85,7 @@ public final class PacketIds {
 
             public static final int
                     CONFIRM_TELEPORTATION = 0x00,
-                    CLIENT_RESPAWN = 0x08,
+                    CLIENT_RESPAWN = 0x09,
                     KEEP_ALIVE = 0x18,
                     SET_PLAYER_POSITION_AND_ROTATION = 0x1B,
                     PONG = 0x27,
