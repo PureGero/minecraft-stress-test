@@ -33,12 +33,44 @@ public class MinecraftStressTest {
 
     private static final EventLoopGroup workerGroup = new NioEventLoopGroup();
 
-    public static void main(String[] a) {
+    public static void main(String[] args) {
+        if (args.length > 0 && (args[0].equals("--help") || args[0].equals("-h"))) {
+            printHelp();
+            return;
+        }
+
         updateBotCount();
 
         new CommandLine().run();
 
         System.out.println("stdin ended");
+    }
+
+    private static void printHelp() {
+        System.out.println("Minecraft Stress Test");
+        System.out.println("Usage: java [options] -jar minecraft-stress-test.jar");
+        System.out.println("\nOptions:");
+        System.out.println("  -Dbot.ip=<ip>                 Set the server IP (default: 127.0.0.1)");
+        System.out.println("  -Dbot.port=<port>             Set the server port (default: 25565)");
+        System.out.println("  -Dbot.count=<count>           Set the number of bots (default: 1)");
+        System.out.println("  -Dbot.login.delay.ms=<delay>  Set the delay between bot logins in ms (default: 100)");
+        System.out.println("  -Dbot.name=<name>             Set the base name for bots (default: Bot)");
+        System.out.println("  -Dbot.protocol.version=<ver>  Set the protocol version (default: 767 - 1.21)");
+        System.out.println("  -Dbot.x=<x>                   Set the center X coordinate (default: 0)");
+        System.out.println("  -Dbot.z=<z>                   Set the center Z coordinate (default: 0)");
+        System.out.println("  -Dbot.logs=<true|false>       Enable or disable bot logs (default: true)");
+        System.out.println("  -Dbot.yaxis=<true|false>      Enable or disable Y-axis movement (default: true)");
+        System.out.println("  -Dbot.viewdistance=<distance> Set the view distance (default: 2)");
+        System.out.println("  -Dbot.speed=<speed>           Set the bot movement speed (default: 0.1)");
+        System.out.println("  -Dbot.radius=<radius>         Set the movement radius (default: 1000)");
+        System.out.println("\nRuntime Commands:");
+        System.out.println("  count <number>                Change the number of bots");
+        System.out.println("  speed <value>                 Change the bot movement speed");
+        System.out.println("  radius <value>                Change the movement radius");
+        System.out.println("  logindelay <value>            Change the delay between bot logins");
+        System.out.println("\nExample:");
+        System.out.println("  java -Dbot.ip=localhost -Dbot.port=25565 -Dbot.count=10 -jar minecraft-stress-test.jar");
+        System.out.println("\nFull list of protocol versions can be found at https://wiki.vg/Protocol_version_numbers");
     }
 
     public static void updateBotCount() {
