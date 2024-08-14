@@ -55,7 +55,6 @@ public class MinecraftStressTest {
         System.out.println("  -Dbot.count=<count>           Set the number of bots (default: 1)");
         System.out.println("  -Dbot.login.delay.ms=<delay>  Set the delay between bot logins in ms (default: 100)");
         System.out.println("  -Dbot.name=<name>             Set the base name for bots (default: Bot)");
-        System.out.println("  -Dbot.protocol.version=<ver>  Set the protocol version (default: 767 - 1.21)");
         System.out.println("  -Dbot.x=<x>                   Set the center X coordinate (default: 0)");
         System.out.println("  -Dbot.z=<z>                   Set the center Z coordinate (default: 0)");
         System.out.println("  -Dbot.logs=<true|false>       Enable or disable bot logs (default: true)");
@@ -70,7 +69,6 @@ public class MinecraftStressTest {
         System.out.println("  logindelay <value>            Change the delay between bot logins");
         System.out.println("\nExample:");
         System.out.println("  java -Dbot.ip=localhost -Dbot.port=25565 -Dbot.count=10 -jar minecraft-stress-test.jar");
-        System.out.println("\nFull list of protocol versions can be found at https://wiki.vg/Protocol_version_numbers");
     }
 
     public static void updateBotCount() {
