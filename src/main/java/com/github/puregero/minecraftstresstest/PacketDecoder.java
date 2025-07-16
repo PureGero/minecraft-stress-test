@@ -1,7 +1,6 @@
 package com.github.puregero.minecraftstresstest;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 
@@ -23,9 +22,7 @@ public class PacketDecoder extends ByteToMessageDecoder {
                 return;
             }
 
-            byte[] bs = new byte[length];
-            friendlyByteBuf.readBytes(bs);
-            list.add(Unpooled.wrappedBuffer(bs));
+            list.add(friendlyByteBuf.readBytes(length));
         }
     }
 }
