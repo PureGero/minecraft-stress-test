@@ -4,13 +4,18 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
+import io.netty.channel.epoll.Epoll;
+import io.netty.channel.epoll.EpollEventLoopGroup;
+import io.netty.channel.epoll.EpollSocketChannel;
+import io.netty.channel.kqueue.KQueue;
+import io.netty.channel.kqueue.KQueueEventLoopGroup;
+import io.netty.channel.kqueue.KQueueSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -31,7 +36,21 @@ public class MinecraftStressTest {
     private static final Lock botsLock = new ReentrantLock();
     private static final AtomicBoolean addingBots = new AtomicBoolean();
 
-    private static final EventLoopGroup workerGroup = new NioEventLoopGroup();
+    private static final EventLoopGroup workerGroup;
+    private static final Class<? extends SocketChannel> nettyChannelClass;
+    static {
+        if (Epoll.isAvailable()) {
+            workerGroup = new EpollEventLoopGroup();
+            nettyChannelClass = EpollSocketChannel.class;
+        } else if (KQueue.isAvailable()) {
+            workerGroup = new KQueueEventLoopGroup();
+            nettyChannelClass = KQueueSocketChannel.class;
+        } else {
+            workerGroup = new NioEventLoopGroup();
+            nettyChannelClass = NioSocketChannel.class;
+        }
+        System.out.println("Using " + workerGroup.getClass().getSimpleName() + " with " + nettyChannelClass.getSimpleName() + " for network communication.");
+    }
 
     public static void main(String[] args) {
         if (args.length > 0 && (args[0].equals("--help") || args[0].equals("-h"))) {
@@ -119,7 +138,7 @@ public class MinecraftStressTest {
 
         Bootstrap b = new Bootstrap();
         b.group(workerGroup);
-        b.channel(NioSocketChannel.class);
+        b.channel(nettyChannelClass);
         b.option(ChannelOption.SO_KEEPALIVE, true);
         b.handler(new ChannelInitializer<SocketChannel>() {
             @Override
