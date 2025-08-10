@@ -97,17 +97,14 @@ public class MinecraftStressTest {
 
     private static void removeBotsIfNeeded() {
         botsLock.lock();
-        while (true) {
+        try {
             Bot removedBot;
-            try {
-                if (bots.size() <= BOT_COUNT) {
-                    break;
-                }
+            while (bots.size() > BOT_COUNT) {
                 removedBot = bots.remove(bots.size() - 1);
-            } finally {
-                botsLock.unlock();
+                removedBot.close();
             }
-            removedBot.close();
+        } finally {
+            botsLock.unlock();
         }
     }
 
