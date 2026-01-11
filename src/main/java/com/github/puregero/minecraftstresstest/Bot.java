@@ -20,7 +20,6 @@ public class Bot extends ChannelInboundHandlerAdapter {
     private static final boolean LOGS = Boolean.parseBoolean(System.getProperty("bot.logs", "true"));
     private static final boolean Y_AXIS = Boolean.parseBoolean(System.getProperty("bot.yaxis", "true"));
     private static final int VIEW_DISTANCE = Integer.parseInt(System.getProperty("bot.viewdistance", "2"));
-    private static final int RESOURCE_PACK_RESPONSE = Integer.parseInt(System.getProperty("bot.resource.pack.response", "3"));
 
     private static final Executor ONE_TICK_DELAY = CompletableFuture.delayedExecutor(50, TimeUnit.MILLISECONDS);
 
@@ -153,26 +152,7 @@ public class Bot extends ChannelInboundHandlerAdapter {
         configState = true;
         //System.out.println("changing to config mode");
 
-        CompletableFuture.delayedExecutor(1000, TimeUnit.MILLISECONDS).execute(() -> {
-            if (configState) {
-                sendPacket(ctx, PacketIds.Serverbound.Configuration.CLIENT_INFORMATION, buffer -> {
-                    buffer.writeUtf("en_GB");
-                    buffer.writeByte(VIEW_DISTANCE);
-                    buffer.writeVarInt(0);
-                    buffer.writeBoolean(true);
-                    buffer.writeByte(0);
-                    buffer.writeVarInt(0);
-                    buffer.writeBoolean(false);
-                    buffer.writeBoolean(true);
-                });
-
-                sendPacket(ctx, PacketIds.Serverbound.Configuration.KNOWN_PACKS, buffer -> {
-                    buffer.writeVarInt(0);
-                });
-            }
-
-            CompletableFuture.delayedExecutor(1000, TimeUnit.MILLISECONDS).execute(() -> tick(ctx));
-        });
+        CompletableFuture.delayedExecutor(1000, TimeUnit.MILLISECONDS).execute(() -> tick(ctx));
     }
 
     @Override
@@ -242,7 +222,7 @@ public class Bot extends ChannelInboundHandlerAdapter {
 
             configState = false;
             playState = true;
-            //System.out.println("changing to play mode");
+            // System.out.println("changing to play mode");
 
         } else if (packetId == PacketIds.Clientbound.Configuration.KEEP_ALIVE) {
             long id = byteBuf.readLong();
@@ -253,6 +233,37 @@ public class Bot extends ChannelInboundHandlerAdapter {
             int id = byteBuf.readInt();
             sendPacket(ctx, PacketIds.Serverbound.Configuration.PONG, buffer -> buffer.writeInt(id));
             //System.out.println(username + " (" + uuid + ") ping config mode");
+
+        } else if (packetId == PacketIds.Clientbound.Configuration.RESOURCE_PACK) {
+
+            UUID uuid = byteBuf.readUUID();
+
+            sendPacket(ctx, PacketIds.Serverbound.Configuration.RESOURCE_PACK, buffer -> {
+                buffer.writeUUID(uuid);
+                buffer.writeVarInt(ResourcePackResponse.SUCCESSFULLY_DOWNLOADED);
+            });
+
+            sendPacket(ctx, PacketIds.Serverbound.Configuration.RESOURCE_PACK, buffer -> {
+                buffer.writeUUID(uuid);
+                buffer.writeVarInt(ResourcePackResponse.ACCEPTED);
+            });
+
+        } else if (packetId == PacketIds.Clientbound.Configuration.KNOWN_PACKS) {
+
+            sendPacket(ctx, PacketIds.Serverbound.Configuration.KNOWN_PACKS, buffer -> {
+                buffer.writeVarInt(0);
+            });
+
+            sendPacket(ctx, PacketIds.Serverbound.Configuration.CLIENT_INFORMATION, buffer -> {
+                buffer.writeUtf("en_GB");
+                buffer.writeByte(VIEW_DISTANCE);
+                buffer.writeVarInt(0);
+                buffer.writeBoolean(true);
+                buffer.writeByte(0);
+                buffer.writeVarInt(0);
+                buffer.writeBoolean(false);
+                buffer.writeBoolean(true);
+            });
 
         }
     }
@@ -321,7 +332,12 @@ public class Bot extends ChannelInboundHandlerAdapter {
 
             sendPacket(ctx, PacketIds.Serverbound.Play.RESOURCE_PACK, buffer -> {
                 buffer.writeUUID(uuid);
-                buffer.writeVarInt(RESOURCE_PACK_RESPONSE);
+                buffer.writeVarInt(ResourcePackResponse.SUCCESSFULLY_DOWNLOADED);
+            });
+
+            sendPacket(ctx, PacketIds.Serverbound.Play.RESOURCE_PACK, buffer -> {
+                buffer.writeUUID(uuid);
+                buffer.writeVarInt(ResourcePackResponse.ACCEPTED);
             });
 
         } else if (packetId == PacketIds.Clientbound.Play.SET_HEALTH) {
@@ -331,6 +347,16 @@ public class Bot extends ChannelInboundHandlerAdapter {
             if (health <= 0) {
                 sendPacket(ctx, PacketIds.Serverbound.Play.CLIENT_RESPAWN, buffer -> buffer.writeVarInt(0));
             }
+        } else if (packetId == PacketIds.Clientbound.Play.START_CONFIGURATION) {
+
+            // System.out.println("changing to config mode");
+
+            configState = true;
+            playState = false;
+            isSpawned = false;
+
+            sendPacket(ctx, PacketIds.Serverbound.Play.ACKNOWLEDGE_CONFIGURATION, buffer -> { });
+
         }
     }
 

@@ -27,7 +27,9 @@ public final class PacketIds {
                     DISCONNECT = 0x02,
                     FINISH_CONFIGURATION = 0x03,
                     KEEP_ALIVE = 0x04,
-                    PING = 0x05;
+                    PING = 0x05,
+                    RESOURCE_PACK = 0x09,
+                    KNOWN_PACKS = 0x0E;
         }
 
         public static final class Play {
@@ -41,7 +43,8 @@ public final class PacketIds {
                     PING = 0x35,
                     SYNCHRONIZE_PLAYER_POSITION = 0x40,
                     RESOURCE_PACK = 0x46,
-                    SET_HEALTH = 0x5D;
+                    SET_HEALTH = 0x5D,
+                    START_CONFIGURATION = 0x69;
         }
 
     }
@@ -76,6 +79,7 @@ public final class PacketIds {
                     FINISH_CONFIGURATION = 0x03,
                     KEEP_ALIVE = 0x04,
                     PONG = 0x05,
+                    RESOURCE_PACK = 0x06,
                     KNOWN_PACKS = 0x07;
         }
 
@@ -86,6 +90,7 @@ public final class PacketIds {
             public static final int
                     CONFIRM_TELEPORTATION = 0x00,
                     CLIENT_RESPAWN = 0x08,
+                    ACKNOWLEDGE_CONFIGURATION = 0x0C,
                     KEEP_ALIVE = 0x18,
                     SET_PLAYER_POSITION_AND_ROTATION = 0x1B,
                     PONG = 0x27,
