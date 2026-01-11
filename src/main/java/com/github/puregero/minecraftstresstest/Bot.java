@@ -311,14 +311,18 @@ public class Bot extends ChannelInboundHandlerAdapter {
 
         } else if (packetId == PacketIds.Clientbound.Play.RESOURCE_PACK) {
 
+            UUID uuid = byteBuf.readUUID();
             String url = byteBuf.readUtf();
             String hash = byteBuf.readUtf();
             boolean forced = byteBuf.readBoolean();
             String message = null;
             if (byteBuf.readBoolean()) message = byteBuf.readUtf();
-            System.out.println("Resource pack info:\n" + url + "\n" + hash + "\n" + forced + "\n" + message);
+            // System.out.println("Resource pack info:\n" + url + "\n" + hash + "\n" + forced + "\n" + message);
 
-            sendPacket(ctx, PacketIds.Serverbound.Play.RESOURCE_PACK, buffer -> buffer.writeVarInt(RESOURCE_PACK_RESPONSE));
+            sendPacket(ctx, PacketIds.Serverbound.Play.RESOURCE_PACK, buffer -> {
+                buffer.writeUUID(uuid);
+                buffer.writeVarInt(RESOURCE_PACK_RESPONSE);
+            });
 
         } else if (packetId == PacketIds.Clientbound.Play.SET_HEALTH) {
 
