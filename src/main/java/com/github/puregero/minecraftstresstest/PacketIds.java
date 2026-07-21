@@ -36,12 +36,12 @@ public final class PacketIds {
 
             //client outbound
             public static final int
-                    DISCONNECT = 0x1A,
+                    DISCONNECT = 0x20,
                     KEEP_ALIVE = 0x2C,
                     PING = 0x3D,
                     SYNCHRONIZE_PLAYER_POSITION = 0x48,
                     RESOURCE_PACK = 0x51,
-                    SET_HEALTH = 0x66;
+                    SET_HEALTH = 0x68;
         }
 
     }
