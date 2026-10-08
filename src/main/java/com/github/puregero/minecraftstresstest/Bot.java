@@ -226,6 +226,10 @@ public class Bot extends ChannelInboundHandlerAdapter {
             buffer.writeFloat(0);
             buffer.writeBoolean(true);
         });
+
+        sendPacket(ctx, PacketIds.Serverbound.Play.CLIENT_TICK_END, buffer -> {
+            // Empty
+        });
     }
 
 
